@@ -26,7 +26,17 @@ func PushCheckResultsToSensu(host string, port int, result CheckResult, timeoutS
 	}
 	defer conn.Close()
 
-	bytes, err := json.Marshal(result)
+	// Use a map to be able to omit unneeded fields
+	resultMap := make(map[string]interface{})
+	resultMap["handlers"] = result.Handlers
+	resultMap["name"] = result.Name
+	resultMap["output"] = result.Output
+	resultMap["status"] = result.Status
+	if result.Ttl > 0 {
+		resultMap["ttl"] = result.Ttl
+	}
+
+	bytes, err := json.Marshal(resultMap)
 	if err != nil {
 		return err
 	}
